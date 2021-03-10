@@ -49,7 +49,9 @@ bool StudentTextEditor::save(std::string file) {
 }
 
 void StudentTextEditor::reset() {
-	// TODO
+    lineList.clear();
+    curCol = 0;
+    curRow = 0;
 }
 
 void StudentTextEditor::move(Dir dir) {
@@ -127,6 +129,24 @@ void StudentTextEditor::del() {
 
 void StudentTextEditor::backspace() {
     auto it = lineList.begin();
+
+    if (curRow == 0 && curCol == 0)
+        return;
+
+    if (curCol == 0) {
+        advance(it, curRow);
+        string moveUp = (*it);
+        lineList.erase(it);
+
+        auto insertMe = lineList.begin();
+        advance(insertMe, curRow - 1);
+
+        curCol = (*insertMe).size();
+        curRow--;
+        (*insertMe) += moveUp;
+        return;
+    }
+
     advance(it, curRow);
 
     string::iterator strIt;
@@ -153,11 +173,25 @@ void StudentTextEditor::insert(char ch) {
 }
 
 void StudentTextEditor::enter() {
-	// TODO
+    list<string>::iterator i = lineList.begin();
+
+    advance(i, curRow);
+    string moveDown = (*i).substr(curCol, (*i).size());
+    
+    if (curCol == 0)
+        (*i) = (*i).substr(0, 0);
+    else
+        (*i) = (*i).substr(0, curCol);
+
+    advance(i, 1);
+    
+    lineList.insert(i, moveDown);
+    curRow++;
+    curCol = 0;
 }
 
 void StudentTextEditor::getPos(int& row, int& col) const {
-	row = curRow; col = curCol; // TODO
+	row = curRow; col = curCol;
 }
 
 int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::string>& lines) const {
@@ -166,7 +200,7 @@ int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::stri
     for (auto it : lineList)
         lines.push_back(it);
     
-	return lines.size(); // TODO
+	return lines.size();
 }
 
 void StudentTextEditor::undo() {
