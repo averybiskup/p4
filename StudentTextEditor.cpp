@@ -36,7 +36,16 @@ bool StudentTextEditor::load(std::string file) {
 }
 
 bool StudentTextEditor::save(std::string file) {
-	return false;  // TODO
+    ofstream outfile(file);
+    
+    if (! outfile)
+        return false;
+
+    for (auto i : lineList) {
+        outfile << i << endl;
+    }
+
+    return true;
 }
 
 void StudentTextEditor::reset() {
@@ -67,9 +76,6 @@ void StudentTextEditor::move(Dir dir) {
             }
             break;
         case LEFT:
-            if (curCol == 0)
-                break;
-
             advance(it, curRow-1);
             maxWidth = (*it).size();
             if (curCol == 0 && curRow != 0) {
@@ -107,7 +113,16 @@ void StudentTextEditor::move(Dir dir) {
 }
 
 void StudentTextEditor::del() {
-	// TODO
+    auto it = lineList.begin();
+    advance(it, curRow);
+
+    string::iterator strIt;
+
+    strIt = (*it).begin() + curCol - 1;
+    (*it).erase(strIt);
+
+    if (curCol >= (*it).size())
+        curCol--;
 }
 
 void StudentTextEditor::backspace() {
@@ -122,11 +137,18 @@ void StudentTextEditor::backspace() {
 }
 
 void StudentTextEditor::insert(char ch) {
-    auto it = lineList.begin();
-    advance(it, curRow);
 
-    (*it).insert(curCol, 1, ch);
-    curCol++;
+    list<string>::iterator i = lineList.begin();
+    if (lineList.size() == 0) {
+        lineList.insert(i, string(1, ch));
+        curCol++;
+    } else {
+        auto it = lineList.begin();
+        advance(it, curRow);
+
+        (*it).insert(curCol, 1, ch);
+        curCol++;
+    }
 
 }
 
